@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, FolderKanban, Upload, Clock4, Cctv, Bot, Network,
   Search, Mic, FileText, Settings, ShieldHalf, ChevronLeft, ChevronRight,
+  Eye, ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -18,7 +19,8 @@ const NAV = [
   { to: "/search", label: "Search Engine", icon: Search },
   { to: "/voice", label: "Voice Assistant", icon: Mic },
   { to: "/reports", label: "Reports", icon: FileText },
-  { to: "/supervisor", label: "Supervisor", icon: Bot },
+  { to: "/third-eye", label: "Third Eye", icon: Eye },
+  { to: "/supervisor", label: "Supervisor", icon: ShieldCheck },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 

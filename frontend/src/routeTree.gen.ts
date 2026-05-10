@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as TimelineRouteImport } from './routes/timeline'
+import { Route as ThirdEyeRouteImport } from './routes/third-eye'
 import { Route as SupervisorRouteImport } from './routes/supervisor'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
@@ -33,6 +34,11 @@ const VoiceRoute = VoiceRouteImport.update({
 const TimelineRoute = TimelineRouteImport.update({
   id: '/timeline',
   path: '/timeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThirdEyeRoute = ThirdEyeRouteImport.update({
+  id: '/third-eye',
+  path: '/third-eye',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupervisorRoute = SupervisorRouteImport.update({
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/supervisor': typeof SupervisorRoute
+  '/third-eye': typeof ThirdEyeRoute
   '/timeline': typeof TimelineRoute
   '/voice': typeof VoiceRoute
   '/cases/$id': typeof CasesIdRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/supervisor': typeof SupervisorRoute
+  '/third-eye': typeof ThirdEyeRoute
   '/timeline': typeof TimelineRoute
   '/voice': typeof VoiceRoute
   '/cases/$id': typeof CasesIdRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/supervisor': typeof SupervisorRoute
+  '/third-eye': typeof ThirdEyeRoute
   '/timeline': typeof TimelineRoute
   '/voice': typeof VoiceRoute
   '/cases_/$id': typeof CasesIdRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/supervisor'
+    | '/third-eye'
     | '/timeline'
     | '/voice'
     | '/cases/$id'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/supervisor'
+    | '/third-eye'
     | '/timeline'
     | '/voice'
     | '/cases/$id'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/supervisor'
+    | '/third-eye'
     | '/timeline'
     | '/voice'
     | '/cases_/$id'
@@ -219,6 +231,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   SupervisorRoute: typeof SupervisorRoute
+  ThirdEyeRoute: typeof ThirdEyeRoute
   TimelineRoute: typeof TimelineRoute
   VoiceRoute: typeof VoiceRoute
   CasesIdRoute: typeof CasesIdRoute
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/timeline'
       fullPath: '/timeline'
       preLoaderRoute: typeof TimelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/third-eye': {
+      id: '/third-eye'
+      path: '/third-eye'
+      fullPath: '/third-eye'
+      preLoaderRoute: typeof ThirdEyeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/supervisor': {
@@ -347,6 +367,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   SupervisorRoute: SupervisorRoute,
+  ThirdEyeRoute: ThirdEyeRoute,
   TimelineRoute: TimelineRoute,
   VoiceRoute: VoiceRoute,
   CasesIdRoute: CasesIdRoute,
