@@ -319,7 +319,7 @@ function SupervisorPage() {
                           <input type="checkbox" checked={selectedCases.has(c.id)} onChange={() => toggleCase(c.id)} />
                         </td>
                         <td className="py-3 px-2">
-                          <Link to="/cases_/$id" params={{ id: c.id }} className="font-medium hover:text-primary">{c.title}</Link>
+                          <Link to="/cases/$id" params={{ id: c.id }} className="font-medium hover:text-primary">{c.title}</Link>
                         </td>
                         <td className="py-3 px-2"><Badge tone="cyan">{c.crime_type}</Badge></td>
                         <td className="py-3 px-2">
@@ -343,11 +343,11 @@ function SupervisorPage() {
                         </td>
                         <td className="py-3 px-2">
                           <div className="flex gap-1">
-                            <Link to="/cases_/$id_/report" params={{ id: c.id }}
+                            <Link to="/cases/$id/report" params={{ id: c.id }}
                               className="px-2 py-1 text-[10px] rounded bg-accent/20 text-accent hover:bg-accent/30">
                               PDF
                             </Link>
-                            <Link to="/cases_/$id" params={{ id: c.id }}
+                            <Link to="/cases/$id" params={{ id: c.id }}
                               className="px-2 py-1 text-[10px] rounded bg-primary/20 text-primary hover:bg-primary/30">
                               Open
                             </Link>
@@ -395,7 +395,7 @@ function SupervisorPage() {
                         <td className="py-3 px-2 ticker-mono">{r.pages}</td>
                         <td className="py-3 px-2 text-muted-foreground text-xs">{new Date(r.created_at).toLocaleDateString()}</td>
                         <td className="py-3 px-2">
-                          <Link to="/cases_/$id_/report" params={{ id: r.case_id }}
+                          <Link to="/cases/$id/report" params={{ id: r.case_id }}
                             className="px-2 py-1 text-[10px] rounded bg-accent text-accent-foreground hover:opacity-90">
                             View Brief
                           </Link>

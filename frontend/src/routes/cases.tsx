@@ -181,7 +181,7 @@ function Cases() {
               </div>
 
               <div className="mt-4 flex items-center justify-end">
-                <Link to="/cases_/$id" params={{ id: c.id }} className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20">
+                <Link to="/cases/$id" params={{ id: c.id }} className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20">
                   <Eye className="h-3.5 w-3.5" /> Open Case
                 </Link>
               </div>

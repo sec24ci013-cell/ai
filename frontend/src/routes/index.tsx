@@ -157,7 +157,7 @@ function Dashboard() {
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Created: {new Date(c.created_at).toLocaleDateString()} · Status: {c.status}</p>
                   </div>
-                  <Link to="/cases_/$id" params={{ id: c.id }}>
+                  <Link to="/cases/$id" params={{ id: c.id }}>
                     <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-accent" />
                   </Link>
                 </motion.li>

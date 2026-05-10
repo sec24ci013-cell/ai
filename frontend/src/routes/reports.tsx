@@ -125,7 +125,7 @@ function Reports() {
                   </div>
                   <div className="flex items-center gap-2">
                     {r.status === "complete" && (
-                      <Link to="/cases_/$id_/report" params={{ id: r.case_id }}
+                      <Link to="/cases/$id/report" params={{ id: r.case_id }}
                         className="px-3 py-1.5 rounded-md bg-accent text-accent-foreground hover:opacity-90 text-xs flex items-center gap-1.5">
                         <FileText className="h-3.5 w-3.5" />Forensic Brief
                       </Link>

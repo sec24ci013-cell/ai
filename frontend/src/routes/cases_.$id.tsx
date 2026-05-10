@@ -111,7 +111,7 @@ function CaseDetail() {
               <ShieldAlert className="h-3.5 w-3.5" />{riskLoading ? "Analyzing…" : "Run Risk Analysis"}
             </button>
             <Link
-              to="/cases_/$id_/report" params={{ id }}
+              to="/cases/$id/report" params={{ id }}
               className="px-3 py-1.5 rounded-md text-xs bg-accent text-accent-foreground hover:opacity-90 flex items-center gap-1.5 ml-2"
             >
               <FileText className="h-3.5 w-3.5" /> Forensic Brief

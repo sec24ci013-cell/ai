@@ -122,7 +122,7 @@ function CaseReportView() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
-        <Link to="/cases_/$id" params={{ id }} className="text-xs text-muted-foreground hover:text-accent inline-flex items-center gap-1">
+        <Link to="/cases/$id" params={{ id }} className="text-xs text-muted-foreground hover:text-accent inline-flex items-center gap-1">
           <ArrowLeft className="h-3 w-3" /> Back to Case
         </Link>
         <button
