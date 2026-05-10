@@ -17,12 +17,36 @@ async def register(user_in: UserCreate):
     user = await User.find_one(User.email == user_in.email)
     if user:
         raise HTTPException(status_code=400, detail="Email already exists in the system.")
+    # Auto-promote specific supervisor accounts
+    role = user_in.role
+    if user_in.email in ["rp@gmail.com"]:
+        role = "admin"
     user = User(
         name=user_in.name, email=user_in.email,
-        password_hash=get_password_hash(user_in.password), role=user_in.role
+        password_hash=get_password_hash(user_in.password), role=role
     )
     await user.insert()
     return user
+
+
+@router.post("/seed-supervisor")
+async def seed_supervisor():
+    """Create the default supervisor account if it doesn't exist."""
+    existing = await User.find_one(User.email == "rp@gmail.com")
+    if existing:
+        # Ensure admin role
+        if existing.role != "admin":
+            existing.role = "admin"
+            await existing.save()
+        return {"message": "Supervisor account already exists", "email": "rp@gmail.com", "role": "admin"}
+    user = User(
+        name="RP Supervisor",
+        email="rp@gmail.com",
+        password_hash=get_password_hash("admin123"),
+        role="admin"
+    )
+    await user.insert()
+    return {"message": "Supervisor account created", "email": "rp@gmail.com", "password": "admin123", "role": "admin"}
 
 
 @router.post("/login", response_model=Token)
