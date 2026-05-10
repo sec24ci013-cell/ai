@@ -19,7 +19,7 @@ async def register(user_in: UserCreate):
         raise HTTPException(status_code=400, detail="Email already exists in the system.")
     # Auto-promote specific supervisor accounts
     role = user_in.role
-    if user_in.email in ["rp@gmail.com"]:
+    if user_in.email in ["rp@gmail.com", "rp1@gmail.com"]:
         role = "admin"
     user = User(
         name=user_in.name, email=user_in.email,
@@ -31,22 +31,29 @@ async def register(user_in: UserCreate):
 
 @router.post("/seed-supervisor")
 async def seed_supervisor():
-    """Create the default supervisor account if it doesn't exist."""
-    existing = await User.find_one(User.email == "rp@gmail.com")
-    if existing:
-        # Ensure admin role
-        if existing.role != "admin":
-            existing.role = "admin"
-            await existing.save()
-        return {"message": "Supervisor account already exists", "email": "rp@gmail.com", "role": "admin"}
-    user = User(
-        name="RP Supervisor",
-        email="rp@gmail.com",
-        password_hash=get_password_hash("admin123"),
-        role="admin"
-    )
-    await user.insert()
-    return {"message": "Supervisor account created", "email": "rp@gmail.com", "password": "admin123", "role": "admin"}
+    """Create the default supervisor accounts if they don't exist."""
+    results = []
+    supervisors = [
+        {"name": "RP Supervisor", "email": "rp@gmail.com", "password": "admin123"},
+        {"name": "RP1 Supervisor", "email": "rp1@gmail.com", "password": "rohit123"},
+    ]
+    for sup in supervisors:
+        existing = await User.find_one(User.email == sup["email"])
+        if existing:
+            if existing.role != "admin":
+                existing.role = "admin"
+                await existing.save()
+            results.append({"email": sup["email"], "status": "exists", "role": "admin"})
+        else:
+            user = User(
+                name=sup["name"],
+                email=sup["email"],
+                password_hash=get_password_hash(sup["password"]),
+                role="admin"
+            )
+            await user.insert()
+            results.append({"email": sup["email"], "status": "created", "role": "admin", "password": sup["password"]})
+    return {"message": "Supervisor accounts ready", "accounts": results}
 
 
 @router.post("/login", response_model=Token)
