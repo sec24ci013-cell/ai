@@ -111,3 +111,46 @@ async def run_graph_agent(case_id: str):
     from app.ai.graph_agent import analyze_graph
     result = analyze_graph(case_id, graph_data.get("nodes", []), graph_data.get("edges", []))
     return {"case_id": case_id, "agent": "graph_agent", "analysis": result}
+
+
+class ToDRequest(BaseModel):
+    body_temp_celsius: float = 32.0
+    ambient_temp_celsius: float = 22.0
+    body_weight_kg: float = 70.0
+    rigor_mortis: str = "developing"  # absent | developing | full | passing | resolved
+    livor_mortis: str = "faint_blanching"  # absent | faint_blanching | developed_blanching | fixed
+    clothing: str = "normal"  # naked | light | normal | heavy
+    scene_discovery_time: str = ""
+    additional_observations: str = ""
+
+
+@router.post("/tod/{case_id}")
+async def run_tod_agent(case_id: str, req: ToDRequest):
+    """Run Time-of-Death estimation agent using postmortem indicators."""
+    case = await Case.get(PydanticObjectId(case_id))
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    from app.ai.tod_agent import estimate_time_of_death
+    params = req.model_dump()
+    result = estimate_time_of_death(case_id, params)
+    return {"case_id": case_id, "agent": "tod_agent", "analysis": result, "input_params": params}
+
+
+@router.post("/face-sketch/{case_id}")
+async def run_face_sketch_agent(case_id: str):
+    """Generate suspect face composite description from witness statements in evidence."""
+    evidence_list = await Evidence.find(Evidence.case_id == PydanticObjectId(case_id)).to_list()
+    witness_text = " | ".join([e.ai_summary or "" for e in evidence_list if e.ai_summary])
+
+    from app.services.llm_client import chat_completion
+    result = chat_completion([
+        {"role": "system", "content": "You are a forensic facial composite specialist. Based on witness statements "
+         "and evidence summaries, generate a detailed textual description of the suspect's facial features. "
+         "Include: face shape, hair (color/style/length), eyes (color/shape), nose, mouth, chin, "
+         "distinguishing marks (scars, tattoos, moles), estimated age range, skin tone, and build. "
+         "Format as a structured suspect profile that could be used by a forensic sketch artist."},
+        {"role": "user", "content": f"Case ID: {case_id}\nEvidence summaries:\n{witness_text[:4000]}"}
+    ])
+    return {"case_id": case_id, "agent": "face_sketch_agent", "analysis": result}
+

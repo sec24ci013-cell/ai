@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Cctv, FileText, Fingerprint, ShieldAlert, Sparkles, Upload } from "lucide-react";
+import { ArrowLeft, Cctv, FileText, Fingerprint, ShieldAlert, Sparkles, Upload, Brain, Clock, User } from "lucide-react";
 import { Panel, Badge, PageHeader } from "@/components/raw/ui";
 import {
   getCase, getCaseEvidence, getCaseTimeline, getRiskScore,
-  type CaseOut, type EvidenceItem, type TimelineEventOut
+  runAutopsyAgent, runToDAgent, runFaceSketchAgent,
+  type CaseOut, type EvidenceItem, type TimelineEventOut, type ToDParams
 } from "@/lib/api";
 
 export const Route = createFileRoute("/cases_/$id")({
@@ -20,6 +21,20 @@ function CaseDetail() {
   const [timeline, setTimeline] = useState<TimelineEventOut[]>([]);
   const [loading, setLoading] = useState(true);
   const [riskLoading, setRiskLoading] = useState(false);
+  // Autopsy
+  const [autopsyResult, setAutopsyResult] = useState<string | null>(null);
+  const [autopsyLoading, setAutopsyLoading] = useState(false);
+  // Time-of-Death
+  const [todResult, setTodResult] = useState<string | null>(null);
+  const [todLoading, setTodLoading] = useState(false);
+  const [todParams, setTodParams] = useState<ToDParams>({
+    body_temp_celsius: 32, ambient_temp_celsius: 22, body_weight_kg: 70,
+    rigor_mortis: "developing", livor_mortis: "faint_blanching",
+    clothing: "normal", scene_discovery_time: "", additional_observations: ""
+  });
+  // Suspect Sketch
+  const [sketchResult, setSketchResult] = useState<string | null>(null);
+  const [sketchLoading, setSketchLoading] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -214,6 +229,98 @@ function CaseDetail() {
           )}
         </Panel>
       </div>
+
+      {/* === FORENSIC INTELLIGENCE PANELS === */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Autopsy Intelligence */}
+        <Panel title="Autopsy Intelligence" subtitle="POSTMORTEM ANALYSIS" right={
+          <button onClick={async () => {
+            setAutopsyLoading(true);
+            try { const r = await runAutopsyAgent(id); setAutopsyResult(r.analysis); } catch(e) { console.error(e); }
+            finally { setAutopsyLoading(false); }
+          }} disabled={autopsyLoading}
+          className="px-3 py-1.5 text-xs rounded-md bg-primary/20 text-primary hover:bg-primary/30 flex items-center gap-1.5 disabled:opacity-50">
+            <Brain className="h-3.5 w-3.5" /> {autopsyLoading ? "Analyzing…" : "Run Autopsy AI"}
+          </button>
+        }>
+          {autopsyResult ? (
+            <div className="text-sm leading-relaxed whitespace-pre-wrap p-2">{autopsyResult}</div>
+          ) : (
+            <p className="text-center py-8 text-muted-foreground text-sm">Upload autopsy/medical evidence then click "Run Autopsy AI" to extract forensic findings.</p>
+          )}
+        </Panel>
+
+        {/* Time-of-Death Estimator */}
+        <Panel title="Time-of-Death Estimator" subtitle="HENSSGE NOMOGRAM + AI" right={
+          <button onClick={async () => {
+            setTodLoading(true);
+            try { const r = await runToDAgent(id, todParams); setTodResult(r.analysis); } catch(e) { console.error(e); }
+            finally { setTodLoading(false); }
+          }} disabled={todLoading}
+          className="px-3 py-1.5 text-xs rounded-md bg-primary/20 text-primary hover:bg-primary/30 flex items-center gap-1.5 disabled:opacity-50">
+            <Clock className="h-3.5 w-3.5" /> {todLoading ? "Estimating…" : "Estimate ToD"}
+          </button>
+        }>
+          {!todResult ? (
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground">Body Temp (°C)</label>
+                <input type="number" step="0.1" value={todParams.body_temp_celsius} onChange={e => setTodParams(p => ({...p, body_temp_celsius: parseFloat(e.target.value)}))} className="w-full mt-1 px-2 py-1.5 rounded bg-secondary/40 border border-border/60" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground">Ambient Temp (°C)</label>
+                <input type="number" step="0.1" value={todParams.ambient_temp_celsius} onChange={e => setTodParams(p => ({...p, ambient_temp_celsius: parseFloat(e.target.value)}))} className="w-full mt-1 px-2 py-1.5 rounded bg-secondary/40 border border-border/60" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground">Body Weight (kg)</label>
+                <input type="number" value={todParams.body_weight_kg} onChange={e => setTodParams(p => ({...p, body_weight_kg: parseFloat(e.target.value)}))} className="w-full mt-1 px-2 py-1.5 rounded bg-secondary/40 border border-border/60" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground">Clothing</label>
+                <select value={todParams.clothing} onChange={e => setTodParams(p => ({...p, clothing: e.target.value}))} className="w-full mt-1 px-2 py-1.5 rounded bg-secondary/40 border border-border/60">
+                  <option value="naked">Naked</option><option value="light">Light</option><option value="normal">Normal</option><option value="heavy">Heavy</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground">Rigor Mortis</label>
+                <select value={todParams.rigor_mortis} onChange={e => setTodParams(p => ({...p, rigor_mortis: e.target.value}))} className="w-full mt-1 px-2 py-1.5 rounded bg-secondary/40 border border-border/60">
+                  <option value="absent">Absent</option><option value="developing">Developing</option><option value="full">Full Body</option><option value="passing">Passing</option><option value="resolved">Resolved</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground">Livor Mortis</label>
+                <select value={todParams.livor_mortis} onChange={e => setTodParams(p => ({...p, livor_mortis: e.target.value}))} className="w-full mt-1 px-2 py-1.5 rounded bg-secondary/40 border border-border/60">
+                  <option value="absent">Absent</option><option value="faint_blanching">Faint (Blanching)</option><option value="developed_blanching">Developed (Blanching)</option><option value="fixed">Fixed (Non-blanching)</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="text-[10px] uppercase text-muted-foreground">Additional Observations</label>
+                <textarea value={todParams.additional_observations} onChange={e => setTodParams(p => ({...p, additional_observations: e.target.value}))} placeholder="Stomach contents, decomposition signs, etc." className="w-full mt-1 px-2 py-1.5 rounded bg-secondary/40 border border-border/60 h-16 resize-none" />
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm leading-relaxed whitespace-pre-wrap p-2">{todResult}</div>
+          )}
+        </Panel>
+      </div>
+
+      {/* Suspect Sketch Agent (Third-Eye inspired) */}
+      <Panel title="Suspect Composite Profile" subtitle="FORENSIC FACE SKETCH · THIRD-EYE" right={
+        <button onClick={async () => {
+          setSketchLoading(true);
+          try { const r = await runFaceSketchAgent(id); setSketchResult(r.analysis); } catch(e) { console.error(e); }
+          finally { setSketchLoading(false); }
+        }} disabled={sketchLoading}
+        className="px-3 py-1.5 text-xs rounded-md bg-primary/20 text-primary hover:bg-primary/30 flex items-center gap-1.5 disabled:opacity-50">
+          <User className="h-3.5 w-3.5" /> {sketchLoading ? "Generating…" : "Generate Profile"}
+        </button>
+      }>
+        {sketchResult ? (
+          <div className="text-sm leading-relaxed whitespace-pre-wrap p-2">{sketchResult}</div>
+        ) : (
+          <p className="text-center py-8 text-muted-foreground text-sm">Upload witness statements, then click "Generate Profile" to create a suspect composite description.</p>
+        )}
+      </Panel>
 
       {/* Chain of Custody */}
       <Panel title="Chain of Custody" subtitle="TAMPER-EVIDENT LEDGER">

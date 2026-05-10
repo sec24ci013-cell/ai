@@ -138,9 +138,21 @@ def process_evidence_task(evidence_id: str, case_id: str = "", file_type: str = 
 
 
 def _download_from_minio(minio_path: str) -> str:
-    """Download a file from MinIO to a local temp path."""
+    """Download a file from MinIO to a local temp path. Falls back to local uploads/ dir."""
     import os
     import tempfile
+
+    # --- FALLBACK: Check local uploads directory first ---
+    # This handles cases where MinIO is not running
+    local_direct = os.path.join("./uploads", os.path.basename(minio_path.split("/", 1)[-1] if "/" in minio_path else minio_path))
+    if os.path.exists(local_direct):
+        print(f"[AI PIPELINE] Using local file: {local_direct}")
+        return local_direct
+
+    # Also check if the full minio_path is itself a local path
+    if os.path.exists(minio_path):
+        print(f"[AI PIPELINE] Using direct path: {minio_path}")
+        return minio_path
 
     try:
         from app.utils.storage import minio_client
@@ -157,4 +169,14 @@ def _download_from_minio(minio_path: str) -> str:
         return local_path
     except Exception as e:
         print(f"[AI PIPELINE] MinIO download failed: {e}")
+        # Final fallback: search uploads directory for any matching filename
+        uploads_dir = "./uploads"
+        if os.path.isdir(uploads_dir):
+            basename = os.path.basename(minio_path)
+            for f in os.listdir(uploads_dir):
+                if f.endswith(basename) or basename in f:
+                    found = os.path.join(uploads_dir, f)
+                    print(f"[AI PIPELINE] Found local fallback: {found}")
+                    return found
         return ""
+

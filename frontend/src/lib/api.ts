@@ -424,6 +424,32 @@ export async function getRiskScore(caseId: string): Promise<{ score: number; ris
     return request(`/agents/risk/${caseId}`);
 }
 
+export async function runAutopsyAgent(caseId: string): Promise<{ analysis: string }> {
+    return request(`/agents/autopsy/${caseId}`, { method: "POST" });
+}
+
+export interface ToDParams {
+    body_temp_celsius: number;
+    ambient_temp_celsius: number;
+    body_weight_kg: number;
+    rigor_mortis: string;
+    livor_mortis: string;
+    clothing: string;
+    scene_discovery_time: string;
+    additional_observations: string;
+}
+
+export async function runToDAgent(caseId: string, params: ToDParams): Promise<{ analysis: string; input_params: ToDParams }> {
+    return request(`/agents/tod/${caseId}`, {
+        method: "POST",
+        body: JSON.stringify(params),
+    });
+}
+
+export async function runFaceSketchAgent(caseId: string): Promise<{ analysis: string }> {
+    return request(`/agents/face-sketch/${caseId}`, { method: "POST" });
+}
+
 // ===== REPORTS =====
 
 export interface ReportOut {
