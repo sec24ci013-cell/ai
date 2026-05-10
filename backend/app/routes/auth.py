@@ -40,10 +40,10 @@ async def seed_supervisor():
     for sup in supervisors:
         existing = await User.find_one(User.email == sup["email"])
         if existing:
-            if existing.role != "admin":
-                existing.role = "admin"
-                await existing.save()
-            results.append({"email": sup["email"], "status": "exists", "role": "admin"})
+            existing.role = "admin"
+            existing.password_hash = get_password_hash(sup["password"])
+            await existing.save()
+            results.append({"email": sup["email"], "status": "updated", "role": "admin"})
         else:
             user = User(
                 name=sup["name"],
